@@ -1,12 +1,15 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import DashboardHome from './pages/DashboardHome';
+import imagotipo from './assets/imagotipo.png';
 
 function App() {
   return (
     <BrowserRouter>
       <div className="app">
         <header className="app-header">
-          <h1>EMBER Monitor</h1>
+          <div className="header-logo-pill">
+            <img className="header-logo" src={imagotipo} alt="Imagotipo Ember" />
+          </div>
         </header>
         <main className="app-main">
           <Routes>

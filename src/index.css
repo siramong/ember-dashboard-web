@@ -98,11 +98,22 @@ body::before {
   align-content: center;
   justify-content: center;
   padding: 12px 20px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: none;
   box-shadow: var(--shadow-card);
   animation: slideDown 0.4s ease;
+}
+
+.header-logo-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  width: 300px;
+  height: 100px;
 }
 
 .header-left {
@@ -112,9 +123,10 @@ body::before {
 }
 
 .header-logo {
-  width: 32px;
-  height: 32px;
+  width: 96px;
+  height: auto;
   flex-shrink: 0;
+  display: block;
 }
 
 .header-title {
