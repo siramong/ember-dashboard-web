@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AppIcon } from './UiIcons';
 
 export function NetworkInfo({ isMinimized = false }) {
   const [time, setTime] = useState(new Date());
@@ -41,7 +42,7 @@ export function NetworkInfo({ isMinimized = false }) {
     return (
       <div className="card widget-card">
         <div className="widget-header">
-          <h3>🌐 Red</h3>
+          <h3><AppIcon name="link" className="widget-title-icon" /> Red</h3>
           <span className="badge">Conectada</span>
         </div>
         <div className="widget-body">

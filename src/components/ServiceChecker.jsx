@@ -4,7 +4,7 @@ import { AppIcon } from './UiIcons';
 const SERVICES = [
   { name: 'Roblox', url: 'https://roblox.com', checkUrl: 'https://roblox.com/' },
   { name: 'Cloudflare', url: 'https://cloudflare.com', checkUrl: 'https://cloudflare.com/' },
-  { name: 'Empresa API', url: 'https://api.aureliainteractive.me', checkUrl: 'https://api.aureliainteractive.me/' },
+  { name: 'API Aurelia Interactive', url: 'https://api.aureliainteractive.me', checkUrl: 'http://localhost:3000' },
 ];
 
 async function checkService(service) {
