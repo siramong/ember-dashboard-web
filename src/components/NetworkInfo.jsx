@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export function NetworkInfo() {
+export function NetworkInfo({ isMinimized = false }) {
   const [time, setTime] = useState(new Date());
   const [ip, setIP] = useState('Cargando...');
   const [loading, setLoading] = useState(true);
@@ -36,9 +36,31 @@ export function NetworkInfo() {
     });
   };
 
+  // Modo minimizado (para dashboard principal)
+  if (isMinimized) {
+    return (
+      <div className="card widget-card">
+        <div className="widget-header">
+          <h3>🌐 Red</h3>
+          <span className="badge">Conectada</span>
+        </div>
+        <div className="widget-body">
+          <div className="widget-stat">
+            <span className="stat-label">Hora</span>
+            <span className="stat-value">{formatTime(time)}</span>
+          </div>
+          <div className="widget-stat">
+            <span className="stat-label">IP</span>
+            <span className="stat-value mono">{loading ? '...' : ip}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Modo detalle (modal)
   return (
-    <div className="card">
-      <h2>Información de Red</h2>
+    <div>
       <div className="info-grid">
         <div className="info-item">
           <span className="label">Hora Local</span>

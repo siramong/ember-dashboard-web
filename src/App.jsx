@@ -1,22 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Navigation } from './components/Navigation';
-import { NetworkPage } from './pages/NetworkPage';
-import { CabinPage } from './pages/CabinPage';
-import { SystemPage } from './pages/SystemPage';
+import DashboardHome from './pages/DashboardHome';
 
 function App() {
   return (
     <BrowserRouter>
       <div className="app">
         <header className="app-header">
-          <h1>EMBER Dashboard</h1>
+          <h1>EMBER Monitor</h1>
         </header>
-        <Navigation />
         <main className="app-main">
           <Routes>
-            <Route path="/" element={<NetworkPage />} />
-            <Route path="/cabin" element={<CabinPage />} />
-            <Route path="/system" element={<SystemPage />} />
+            <Route path="/" element={<DashboardHome />} />
           </Routes>
         </main>
       </div>

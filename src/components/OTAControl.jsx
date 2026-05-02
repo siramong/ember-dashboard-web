@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
+import { AppIcon } from './UiIcons';
 
-export function OTAControl() {
+export function OTAControl({ isMinimized = false }) {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,13 +31,38 @@ export function OTAControl() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  if (loading) return <div className="card loading">Cargando estado OTA...</div>;
-  if (error) return <div className="card error">{error}</div>;
+  if (loading && isMinimized) return <div className="card widget-card loading">Cargando...</div>;
+  if (error && isMinimized) return <div className="card widget-card error">{error}</div>;
+
+  // Modo minimizado
+  if (isMinimized) {
+    return (
+      <div className="card widget-card">
+        <div className="widget-header">
+          <h3><AppIcon name="ota" className="widget-title-icon" /> OTA Sistema</h3>
+          <span className="badge">v{version}</span>
+        </div>
+        <div className="widget-body">
+          <div className="widget-stat">
+            <span className="stat-label">Dispositivos</span>
+            <span className="stat-value">{devices.length}</span>
+          </div>
+          <div className="widget-stat">
+            <span className="stat-label">Estado</span>
+            <span className="stat-value status-ok">Activo</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Modo detalle
+  if (loading) return <div className="loading">Cargando estado OTA...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className="card">
-      <h2>Sistema OTA</h2>
-      <button onClick={fetchData} className="refresh-btn">⟳ Actualizar</button>
+    <div>
+      <button onClick={fetchData} className="refresh-btn"><AppIcon name="refresh" className="btn-icon" size={14} /> Actualizar</button>
       
       <div className="ota-status">
         <div className="ota-item">

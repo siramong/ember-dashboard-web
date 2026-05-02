@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { api } from '../services/api';
+import { AppIcon } from './UiIcons';
 
-export function CabinControl() {
+export function CabinControl({ isMinimized = false }) {
   const { connected, lastMessage } = useWebSocket();
   const [state, setState] = useState({ simulation: 'stopped', movement: 'idle', event: null });
   const [loading, setLoading] = useState(true);
@@ -48,11 +49,37 @@ export function CabinControl() {
     }
   };
 
-  if (loading) return <div className="card loading">Cargando...</div>;
+  if (loading && isMinimized) return <div className="card widget-card loading">Cargando...</div>;
+
+  // Modo minimizado
+  if (isMinimized) {
+    return (
+      <div className="card widget-card">
+        <div className="widget-header">
+          <h3><AppIcon name="cabin" className="widget-title-icon" /> Cabina</h3>
+          <span className={`badge ${connected ? 'connected' : 'disconnected'}`}>
+            {connected ? 'Conectado' : 'Desconectado'}
+          </span>
+        </div>
+        <div className="widget-body">
+          <div className="widget-stat">
+            <span className="stat-label">Estado</span>
+            <span className="stat-value">{state.event || state.simulation}</span>
+          </div>
+          <div className="quick-actions">
+            <button className="btn-mini" onClick={() => handleSimulation('earthquake')}><AppIcon name="wave" className="btn-icon" size={14} /> Sismo</button>
+            <button className="btn-mini" onClick={() => handleSimulation('fire')}><AppIcon name="fire" className="btn-icon" size={14} /> Fuego</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Modo detalle
+  if (loading) return <div className="loading">Cargando...</div>;
 
   return (
-    <div className="card">
-      <h2>Control de Cabina</h2>
+    <div>
       <div className="connection-status">
         <span className={`status-dot ${connected ? 'connected' : 'disconnected'}`}></span>
         <span>{connected ? 'Conectado' : 'Desconectado'}</span>
@@ -65,20 +92,20 @@ export function CabinControl() {
             className={`btn ${state.simulation !== 'stopped' ? 'active' : ''}`}
             onClick={() => handleSimulation('earthquake')}
           >
-            🌊 Sismo
+            <AppIcon name="wave" className="btn-icon" size={15} /> Sismo
           </button>
           <button 
             className={`btn ${state.simulation !== 'stopped' ? 'active' : ''}`}
             onClick={() => handleSimulation('fire')}
           >
-            🔥 Fuego
+            <AppIcon name="fire" className="btn-icon" size={15} /> Fuego
           </button>
           <button 
             className="btn stop"
             onClick={handleSimulation}
             disabled={state.simulation === 'stopped'}
           >
-            ⏹ Detener
+            <AppIcon name="stop" className="btn-icon" size={15} /> Detener
           </button>
         </div>
         <p className="status-text">Estado: {state.event || state.simulation}</p>
@@ -97,11 +124,11 @@ export function CabinControl() {
       <div className="section">
         <h3>LEDs</h3>
         <div className="button-group leds">
-          <button onClick={() => handleActuator('led_red')}>🔴 Rojo</button>
-          <button onClick={() => handleActuator('led_green')}>🟢 Verde</button>
-          <button onClick={() => handleActuator('led_blue')}>🔵 Azul</button>
-          <button onClick={() => handleActuator('led_earthquake')}>🌊 Sismo</button>
-          <button onClick={() => handleActuator('led_off')}>⚫ Apagar</button>
+          <button onClick={() => handleActuator('led_red')}><AppIcon name="led" className="btn-icon led-red" size={15} /> Rojo</button>
+          <button onClick={() => handleActuator('led_green')}><AppIcon name="led" className="btn-icon led-green" size={15} /> Verde</button>
+          <button onClick={() => handleActuator('led_blue')}><AppIcon name="led" className="btn-icon led-blue" size={15} /> Azul</button>
+          <button onClick={() => handleActuator('led_earthquake')}><AppIcon name="wave" className="btn-icon" size={15} /> Sismo</button>
+          <button onClick={() => handleActuator('led_off')}><AppIcon name="power" className="btn-icon" size={15} /> Apagar</button>
         </div>
       </div>
     </div>
