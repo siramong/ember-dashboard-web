@@ -10,12 +10,12 @@ export function OTAControl({ isMinimized = false }) {
 
   const fetchData = useCallback(async () => {
     try {
-      const [, devicesData, versionData] = await Promise.all([
+      const [, networkData, versionData] = await Promise.all([
         api.ota.getStatus(),
-        api.ota.getDevices(),
+        api.network.getDevices(),
         api.ota.getVersion(),
       ]);
-      setDevices(devicesData.devices || devicesData || []);
+      setDevices(networkData.devices || []);
       setVersion(versionData.version || 'N/A');
       setError(null);
     } catch {
@@ -86,11 +86,11 @@ export function OTAControl({ isMinimized = false }) {
         ) : (
           <div className="device-list">
             {devices.map((device, i) => (
-              <div key={device.device_id || i} className="device-item">
-                <span className="device-id">{device.device_id}</span>
-                <span className="device-version">v{device.version || '?'}</span>
+              <div key={device.ip || i} className="device-item">
+                <span className="device-id">{device.hostname || device.ip}</span>
+                <span className="device-version">{device.mac || device.source || 'sin MAC'}</span>
                 <span className="device-last-seen">
-                  {device.last_seen ? new Date(device.last_seen).toLocaleTimeString('es-EC') : 'Nunca'}
+                  {device.lastSeen ? new Date(device.lastSeen).toLocaleTimeString('es-EC') : device.status}
                 </span>
               </div>
             ))}

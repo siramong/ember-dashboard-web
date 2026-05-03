@@ -1,6 +1,6 @@
-const EMBER_SERVER_REST = import.meta.env.VITE_EMBER_SERVER_REST || 'https://api.aureliainteractive.me';
-const EMBER_SERVER_WS = import.meta.env.VITE_EMBER_SERVER_WS || 'wss://ws.aureliainteractive.me';
-const OTA_SERVER = import.meta.env.VITE_OTA_SERVER || 'https://api.aureliainteractive.me';
+const EMBER_SERVER_REST = import.meta.env.VITE_EMBER_SERVER_REST;
+const EMBER_SERVER_WS = import.meta.env.VITE_EMBER_SERVER_WS;
+const OTA_SERVER = import.meta.env.VITE_OTA_SERVER;
 
 export const api = {
   server: {
