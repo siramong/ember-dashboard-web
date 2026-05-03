@@ -21,8 +21,9 @@ VITE_OTA_SERVER=https://api.aureliainteractive.me
 
 ## Funciones integradas
 
-- Consulta `GET /state` para simulacion, movimiento y actuadores.
+- Consulta `GET /dashboard/state` para simulacion, movimiento y actuadores, sin contaminar el polling de Roblox.
 - Consulta `GET /health` para saber si la cabina ESP32 esta conectada.
+- Consulta `GET /network/devices` para listar dispositivos detectados por el servidor dentro de la LAN EMBER.
 - Detiene simulaciones con `POST /simulation/stop` para parada de emergencia, usando body JSON:
 
 ```json

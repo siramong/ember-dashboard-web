@@ -4,18 +4,20 @@ import { AppIcon } from './UiIcons';
 
 export function DeviceList({ isMinimized = false }) {
   const [devices, setDevices] = useState([]);
+  const [scanInfo, setScanInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastCheck, setLastCheck] = useState(null);
 
-  const fetchDevices = useCallback(async () => {
+  const fetchDevices = useCallback(async (force = false) => {
     try {
-      const data = await api.ota.getDevices();
-      setDevices(data.devices || data || []);
+      const data = await api.network.getDevices(force);
+      setDevices(data.devices || []);
+      setScanInfo(data);
       setError(null);
-      setLastCheck(Date.now());
+      setLastCheck(data.scannedAt || Date.now());
     } catch {
-      setError('No se pudo obtener dispositivos');
+      setError('No se pudo escanear la red');
     } finally {
       setLoading(false);
     }
@@ -27,13 +29,16 @@ export function DeviceList({ isMinimized = false }) {
     return () => clearInterval(interval);
   }, [fetchDevices]);
 
-  const getStatusColor = (lastSeen) => {
-    if (!lastSeen || !lastCheck) return 'offline';
-    const diff = lastCheck - new Date(lastSeen).getTime();
-    return diff < 60000 ? 'online' : diff < 300000 ? 'warning' : 'offline';
+  const getStatusColor = (device) => {
+    if (device.status === 'online') return 'online';
+    if (device.status === 'seen') return 'warning';
+    return 'offline';
   };
 
-  const onlineCount = devices.filter(d => getStatusColor(d.last_seen) === 'online').length;
+  const onlineCount = devices.filter(d => getStatusColor(d) === 'online').length;
+  const seenCount = devices.length;
+  const formatDeviceName = (device) => device.hostname || device.ip || 'Dispositivo';
+  const formatDeviceMeta = (device) => device.mac || device.source || 'sin MAC';
 
   // Modo minimizado (para dashboard principal)
   if (isMinimized) {
@@ -41,7 +46,7 @@ export function DeviceList({ isMinimized = false }) {
       <div className="card widget-card">
         <div className="widget-header">
           <h3><AppIcon name="device" className="widget-title-icon" /> Dispositivos</h3>
-          <span className="badge">{onlineCount} en línea</span>
+          <span className="badge">{onlineCount}/{seenCount} en línea</span>
         </div>
         <div className="widget-body">
           {error ? (
@@ -51,15 +56,16 @@ export function DeviceList({ isMinimized = false }) {
           ) : (
             <div className="widget-preview">
               {devices.slice(0, 3).map((device, i) => (
-                <div key={device.device_id || i} className={`preview-item ${getStatusColor(device.last_seen)}`}>
-                  <span className="device-id">{device.device_id}</span>
+                <div key={device.ip || i} className={`preview-item ${getStatusColor(device)}`}>
+                  <span className="device-id">{formatDeviceName(device)}</span>
                   <span className="device-status">
-                    {getStatusColor(device.last_seen) === 'online' ? '● En línea' : 
-                     getStatusColor(device.last_seen) === 'warning' ? '● Inactivo' : '○ Offline'}
+                    {getStatusColor(device) === 'online' ? '● En línea' :
+                     getStatusColor(device) === 'warning' ? '● Visto' : '○ Offline'}
                   </span>
                 </div>
               ))}
               {devices.length > 3 && <p className="more-text">+{devices.length - 3} más</p>}
+              {scanInfo?.interface && <p className="more-text">{scanInfo.interface.address}</p>}
             </div>
           )}
         </div>
@@ -73,18 +79,27 @@ export function DeviceList({ isMinimized = false }) {
 
   return (
     <div>
-      <button onClick={fetchDevices} className="refresh-btn"><AppIcon name="refresh" className="btn-icon" size={14} /> Actualizar</button>
+      <button onClick={() => fetchDevices(true)} className="refresh-btn"><AppIcon name="refresh" className="btn-icon" size={14} /> Escanear ahora</button>
+      {scanInfo?.interface && (
+        <p className="last-check">
+          Red escaneada desde {scanInfo.interface.name} · {scanInfo.interface.address}
+          {scanInfo.cached ? ' · cache' : ''}
+        </p>
+      )}
       <div className="device-list">
         {devices.length === 0 ? (
           <p className="empty">No hay dispositivos registrados</p>
         ) : (
           devices.map((device, i) => (
-            <div key={device.device_id || i} className={`device-item ${getStatusColor(device.last_seen)}`}>
-              <span className="device-id">{device.device_id}</span>
-              <span className="device-version">v{device.version || 'desconocida'}</span>
+            <div key={device.ip || i} className={`device-item ${getStatusColor(device)}`}>
+              <span className="device-id">{formatDeviceName(device)}</span>
+              <span className="device-version">{formatDeviceMeta(device)}</span>
               <span className="device-status">
-                {getStatusColor(device.last_seen) === 'online' ? 'En línea' : 
-                 getStatusColor(device.last_seen) === 'warning' ? 'Inactivo' : 'Fuera de línea'}
+                {getStatusColor(device) === 'online'
+                  ? `En línea${device.latencyMs !== null ? ` · ${device.latencyMs}ms` : ''}`
+                  : getStatusColor(device) === 'warning'
+                    ? 'Visto por ARP'
+                    : 'Fuera de línea'}
               </span>
             </div>
           ))
