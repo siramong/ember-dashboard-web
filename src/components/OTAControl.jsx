@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '../services/api';
+import { api, OTA_SERVER } from '../services/api';
 import { AppIcon } from './UiIcons';
 
 export function OTAControl({ isMinimized = false }) {
@@ -101,7 +101,7 @@ export function OTAControl({ isMinimized = false }) {
       <div className="section">
         <h3>Actualizar Firmware</h3>
         <p className="info-text">Para actualizar el firmware, sube el archivo .bin desde el dashboard del servidor OTA.</p>
-        <a href={`${import.meta.env.VITE_OTA_SERVER || 'http://localhost:3000'}`} target="_blank" rel="noopener noreferrer" className="btn">
+        <a href={OTA_SERVER} target="_blank" rel="noopener noreferrer" className="btn">
           Abrir Dashboard OTA
         </a>
       </div>

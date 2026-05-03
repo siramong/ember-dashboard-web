@@ -11,12 +11,12 @@ El dashboard web consume el servidor EMBER por REST. El WebSocket del servidor q
 
 ## Configuración
 
-Edita el archivo `.env` con las IPs de tus servidores:
+Edita el archivo `.env` con los endpoints publicos del proyecto:
 
 ```env
-VITE_EMBER_SERVER_REST=http://192.168.1.X:3000
-VITE_EMBER_SERVER_WS=ws://192.168.1.X:8080
-VITE_OTA_SERVER=http://192.168.1.X:3000
+VITE_EMBER_SERVER_REST=https://api.aureliainteractive.me
+VITE_EMBER_SERVER_WS=wss://ws.aureliainteractive.me
+VITE_OTA_SERVER=https://api.aureliainteractive.me
 ```
 
 ## Funciones integradas
