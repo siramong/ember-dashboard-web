@@ -26,10 +26,13 @@ export function ActuatorStatus({ isMinimized = false }) {
   if (loading && isMinimized) return <div className="card widget-card loading">Cargando...</div>;
   if (!state && isMinimized) return <div className="card widget-card error">Sin datos</div>;
 
+  const values = state?.actuators || {};
   const actuators = [
-    { key: 'motor', label: 'Motor', active: state?.motor_on },
-    { key: 'heater', label: 'Calentador', active: state?.heater_on },
-    { key: 'led', label: 'LED', active: state?.led_color && state.led_color !== 'off' },
+    { key: 'motor', label: 'Motor', active: values.motor, icon: 'actuator' },
+    { key: 'heater', label: 'Calefactor', active: values.heater, icon: 'fire' },
+    { key: 'ledTower', label: 'Torre LED', active: values.ledTower, icon: 'led' },
+    { key: 'buzzer', label: 'Buzzer', active: values.buzzer, icon: 'service' },
+    { key: 'ledStrips', label: 'Tira LED', active: values.ledStrips, icon: 'led' },
   ];
 
   const activeCount = actuators.filter(a => a.active).length;
@@ -65,19 +68,20 @@ export function ActuatorStatus({ isMinimized = false }) {
       <div className="actuator-grid">
         {actuators.map(act => (
           <div key={act.key} className={`actuator-item ${act.active ? 'active' : 'inactive'}`}>
+            <AppIcon name={act.icon} className="actuator-icon" size={22} />
             <span className="actuator-label">{act.label}</span>
-            <span className="actuator-status">
-              {act.active ? 'ACTIVADO' : 'DESACTIVADO'}
+            <span className={`actuator-badge ${act.active ? 'on' : 'off'}`}>
+              {act.active ? 'ACTIVO' : 'INACTIVO'}
             </span>
           </div>
         ))}
       </div>
-      {state.led_color && (
-        <div className="led-indicator">
-          <span>Color LED: </span>
-          <span className={`led-color ${state.led_color}`}>{state.led_color}</span>
-        </div>
-      )}
+      <div className="event-display">
+        <span className="event-label">Simulación</span>
+        <span className={`event-value ${state.simulation !== 'idle' ? 'active' : ''}`}>
+          {state.simulation || 'idle'} {state.difficulty ? `· ${state.difficulty}` : ''}
+        </span>
+      </div>
     </div>
   );
 }

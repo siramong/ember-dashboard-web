@@ -1,17 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AppIcon } from './UiIcons';
+import { EMBER_SERVER_REST, OTA_SERVER } from '../services/api';
 
 const SERVICES = [
   { name: 'Roblox', url: 'https://roblox.com', checkUrl: 'https://roblox.com/' },
   { name: 'Cloudflare', url: 'https://cloudflare.com', checkUrl: 'https://cloudflare.com/' },
-  { name: 'API Aurelia Interactive', url: 'https://api.aureliainteractive.me', checkUrl: 'http://localhost:3000' },
+  { name: 'EMBER REST', url: EMBER_SERVER_REST, checkUrl: `${EMBER_SERVER_REST}/health`, mode: 'cors' },
+  { name: 'OTA', url: OTA_SERVER, checkUrl: `${OTA_SERVER}/status`, mode: 'cors' },
 ];
 
 async function checkService(service) {
   const start = Date.now();
   try {
     await fetch(service.checkUrl, { 
-      mode: 'no-cors',
+      mode: service.mode || 'no-cors',
       cache: 'no-store'
     });
     const latency = Date.now() - start;

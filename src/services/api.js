@@ -6,18 +6,8 @@ export const api = {
   server: {
     getState: () => fetch(`${EMBER_SERVER_REST}/state`).then(r => r.json()),
     getHealth: () => fetch(`${EMBER_SERVER_REST}/health`).then(r => r.json()),
-    startSimulation: (mode) => fetch(`${EMBER_SERVER_REST}/simulation/start`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode })
-    }).then(r => r.json()),
     stopSimulation: () => fetch(`${EMBER_SERVER_REST}/simulation/stop`, {
       method: 'POST'
-    }).then(r => r.json()),
-    controlActuator: (action) => fetch(`${EMBER_SERVER_REST}/actuator`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action })
     }).then(r => r.json()),
   },
   ota: {
@@ -27,16 +17,7 @@ export const api = {
     getVersion: () => fetch(`${OTA_SERVER}/version`).then(r => r.json()),
   },
   network: {
-    getLocalIP: () => {
-      const s = new WebSocket(EMBER_SERVER_WS.replace('http', 'ws'));
-      return new Promise((resolve) => {
-        s.onopen = () => {
-          resolve(s);
-          s.close();
-        };
-        s.onerror = () => resolve(null);
-      });
-    },
+    getLocalIP: () => api.server.getHealth().then(() => EMBER_SERVER_REST).catch(() => null),
   }
 };
 
