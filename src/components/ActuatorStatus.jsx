@@ -2,17 +2,40 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { AppIcon } from './UiIcons';
 
+const DEFAULT_STATE = {
+  simulation: 'idle',
+  difficulty: null,
+  actuators: {
+    motor: false,
+    heater: false,
+    ledTower: false,
+    buzzer: false,
+    ledStrips: false,
+  },
+};
+
 export function ActuatorStatus({ isMinimized = false }) {
-  const [state, setState] = useState(null);
+  const [state, setState] = useState(DEFAULT_STATE);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchState = async () => {
       try {
         const data = await api.server.getState();
-        setState(data);
+        setState(prev => ({
+          ...prev,
+          ...data,
+          actuators: {
+            ...DEFAULT_STATE.actuators,
+            ...prev.actuators,
+            ...(data.actuators || {}),
+          },
+        }));
+        setError(false);
       } catch (e) {
         console.error(e);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -24,9 +47,8 @@ export function ActuatorStatus({ isMinimized = false }) {
   }, []);
 
   if (loading && isMinimized) return <div className="card widget-card loading">Cargando...</div>;
-  if (!state && isMinimized) return <div className="card widget-card error">Sin datos</div>;
 
-  const values = state?.actuators || {};
+  const values = state.actuators || DEFAULT_STATE.actuators;
   const actuators = [
     { key: 'motor', label: 'Motor', active: values.motor, icon: 'actuator' },
     { key: 'heater', label: 'Calefactor', active: values.heater, icon: 'fire' },
@@ -54,6 +76,7 @@ export function ActuatorStatus({ isMinimized = false }) {
               </div>
             ))}
           </div>
+          {error && <p className="widget-note">Mostrando último estado conocido</p>}
         </div>
       </div>
     );
@@ -61,10 +84,10 @@ export function ActuatorStatus({ isMinimized = false }) {
 
   // Modo detalle
   if (loading) return <div className="loading">Cargando estado...</div>;
-  if (!state) return <div className="error">Sin datos del servidor</div>;
 
   return (
     <div>
+      {error && <p className="error-text">No se pudo refrescar el estado. Mostrando último estado conocido.</p>}
       <div className="actuator-grid">
         {actuators.map(act => (
           <div key={act.key} className={`actuator-item ${act.active ? 'active' : 'inactive'}`}>
