@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '../services/api';
+import { api, EMBER_SERVER_REST } from '../services/api';
 import { AppIcon } from './UiIcons';
 
 const SIMULATIONS = [
@@ -14,6 +14,7 @@ export function CabinControl({ isMinimized = false }) {
   const [health, setHealth] = useState({ cabina: false });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [serverControl, setServerControl] = useState({ pending: false, response: null });
 
   const fetchState = useCallback(async () => {
     try {
@@ -39,11 +40,14 @@ export function CabinControl({ isMinimized = false }) {
   }, [fetchState]);
 
   const handleStop = async () => {
+    setServerControl({ pending: true, response: null });
     try {
-      await api.server.stopSimulation();
+      const response = await api.server.stopSimulation('emergency_stop');
+      setServerControl({ pending: false, response });
       await fetchState();
     } catch (err) {
       console.error(err);
+      setServerControl({ pending: false, response: null });
       setError('No se pudo detener la simulación');
     }
   };
@@ -116,15 +120,30 @@ export function CabinControl({ isMinimized = false }) {
       </div>
 
       <div className="section">
-        <h3>Seguridad</h3>
+        <h3>Control del servidor</h3>
+        <div className="server-control-panel">
+          <div className="server-endpoint">
+            <span className="stat-label">Endpoint REST</span>
+            <code>POST {EMBER_SERVER_REST}/simulation/stop</code>
+          </div>
+          <pre className="server-body-preview">{`{
+  "source": "dashboard-web",
+  "reason": "emergency_stop"
+}`}</pre>
+        </div>
         <button
           className="btn btn-danger"
           onClick={handleStop}
-          disabled={!simulationActive}
+          disabled={serverControl.pending}
         >
-          <AppIcon name="stop" className="btn-icon" size={15} /> Parada de emergencia
+          <AppIcon name="stop" className="btn-icon" size={15} />
+          {serverControl.pending ? 'Enviando parada...' : 'Parada de emergencia'}
         </button>
-        <p className="status-text">El dashboard web solo puede detener una simulación activa. El inicio y los comandos de simulación viven en el servidor/Roblox.</p>
+        <p className="status-text">
+          {serverControl.response
+            ? `Respuesta servidor: ${serverControl.response.message || serverControl.response.status || 'stop recibido'}`
+            : 'El dashboard web solo puede detener por emergencia. El inicio de simulaciones vive fuera de este panel.'}
+        </p>
       </div>
     </div>
   );

@@ -23,7 +23,15 @@ VITE_OTA_SERVER=https://api.aureliainteractive.me
 
 - Consulta `GET /state` para simulacion, movimiento y actuadores.
 - Consulta `GET /health` para saber si la cabina ESP32 esta conectada.
-- Detiene simulaciones con `POST /simulation/stop` para parada de emergencia.
+- Detiene simulaciones con `POST /simulation/stop` para parada de emergencia, usando body JSON:
+
+```json
+{
+  "source": "dashboard-web",
+  "reason": "emergency_stop"
+}
+```
+
 - Muestra estado de simulacion, dificultad, movimiento y actuadores.
 
 Simulaciones soportadas:
@@ -42,7 +50,7 @@ Dificultades soportadas:
 Importante:
 
 - El dashboard web no debe abrir una conexion WebSocket al servidor EMBER, porque el WebSocket es la conexion persistente de la cabina.
-- El dashboard web no debe iniciar simulaciones ni enviar comandos de motor. Es una version compacta/observadora del dashboard del servidor con parada de emergencia.
+- El dashboard web no debe iniciar simulaciones ni enviar comandos de motor. Es una version compacta/observadora del dashboard del servidor con control REST limitado a parada de emergencia.
 
 ## Instalación
 

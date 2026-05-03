@@ -6,9 +6,22 @@ export const api = {
   server: {
     getState: () => fetch(`${EMBER_SERVER_REST}/state`).then(r => r.json()),
     getHealth: () => fetch(`${EMBER_SERVER_REST}/health`).then(r => r.json()),
-    stopSimulation: () => fetch(`${EMBER_SERVER_REST}/simulation/stop`, {
-      method: 'POST'
-    }).then(r => r.json()),
+    stopSimulation: (reason = 'emergency_stop') => fetch(`${EMBER_SERVER_REST}/simulation/stop`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source: 'dashboard-web',
+        reason,
+      }),
+    }).then(async r => {
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error(data.error || `HTTP ${r.status}`);
+      }
+      return data;
+    }),
   },
   ota: {
     getStatus: () => fetch(`${OTA_SERVER}/status`).then(r => r.json()),
