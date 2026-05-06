@@ -15,11 +15,11 @@ const DEFAULT_STATE = {
 };
 
 const ACTUATOR_DEFS = [
-  { key: 'motor',     label: 'Motor',     icon: 'actuator' },
+  { key: 'motor',     label: 'Motor',      icon: 'motor'    },
   { key: 'heater',    label: 'Calefactor', icon: 'fire'     },
-  { key: 'ledTower',  label: 'Torre LED',  icon: 'led'      },
-  { key: 'buzzer',    label: 'Buzzer',     icon: 'service'  },
-  { key: 'ledStrips', label: 'Tira LED',   icon: 'led'      },
+  { key: 'ledTower',  label: 'Torre LED',  icon: 'ledTower' },
+  { key: 'buzzer',    label: 'Buzzer',     icon: 'bell'     },
+  { key: 'ledStrips', label: 'Tira LED',   icon: 'ledStrip' },
 ];
 
 export function ActuatorStatus({ isMinimized = false }) {

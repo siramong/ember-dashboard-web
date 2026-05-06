@@ -8,6 +8,7 @@ export function DeviceList({ isMinimized = false }) {
   const [scanInfo, setScanInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all');
 
   const fetchDevices = useCallback(async (force = false) => {
     try {
@@ -35,6 +36,19 @@ export function DeviceList({ isMinimized = false }) {
   };
 
   const onlineCount = devices.filter(d => getStatusColor(d) === 'online').length;
+  const filteredDevices = devices.filter((device) => {
+    const status = getStatusColor(device);
+    if (filter === 'all') return true;
+    return status === filter;
+  });
+
+  const filterCounts = {
+    all: devices.length,
+    online: devices.filter(d => getStatusColor(d) === 'online').length,
+    warning: devices.filter(d => getStatusColor(d) === 'warning').length,
+    offline: devices.filter(d => getStatusColor(d) === 'offline').length,
+  };
+
   const formatDeviceName = (device) => device.hostname || device.ip || 'Dispositivo';
   const formatDeviceMeta = (device) => device.mac || device.source || 'sin MAC';
 
@@ -94,6 +108,20 @@ export function DeviceList({ isMinimized = false }) {
       <button onClick={() => fetchDevices(true)} className="refresh-btn">
         <AppIcon name="refresh" className="btn-icon" size={14} /> Escanear ahora
       </button>
+      <div className="inline-actions">
+        <button type="button" className={`btn-mini ${filter === 'all' ? 'selected' : ''}`} onClick={() => setFilter('all')}>
+          Todos ({filterCounts.all})
+        </button>
+        <button type="button" className={`btn-mini ${filter === 'online' ? 'selected' : ''}`} onClick={() => setFilter('online')}>
+          En línea ({filterCounts.online})
+        </button>
+        <button type="button" className={`btn-mini ${filter === 'warning' ? 'selected' : ''}`} onClick={() => setFilter('warning')}>
+          Vistos ({filterCounts.warning})
+        </button>
+        <button type="button" className={`btn-mini ${filter === 'offline' ? 'selected' : ''}`} onClick={() => setFilter('offline')}>
+          Offline ({filterCounts.offline})
+        </button>
+      </div>
       {scanInfo?.interface && (
         <p className="last-check">
           Red escaneada desde {scanInfo.interface.name} · {scanInfo.interface.address}
@@ -101,10 +129,10 @@ export function DeviceList({ isMinimized = false }) {
         </p>
       )}
       <div className="device-list">
-        {devices.length === 0 ? (
+        {filteredDevices.length === 0 ? (
           <p className="empty">No hay dispositivos registrados</p>
         ) : (
-          devices.map((device, i) => (
+          filteredDevices.map((device, i) => (
             <div key={device.ip || i} className={`device-item ${getStatusColor(device)}`}>
               <span className="device-id">{formatDeviceName(device)}</span>
               <span className="device-version">{formatDeviceMeta(device)}</span>

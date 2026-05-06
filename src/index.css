@@ -159,6 +159,13 @@ body::before {
   top: -1px;
 }
 
+.inline-icon {
+  margin-right: 6px;
+  color: var(--accent);
+  position: relative;
+  top: -1px;
+}
+
 .btn-icon.led-red,
 .btn-icon.led-green,
 .btn-icon.led-blue {
@@ -189,63 +196,6 @@ body::before {
   color: var(--text-dim);
   letter-spacing: 0.06em;
 }
-
-/* — NAVIGATION — */
-.navigation {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 6px;
-  box-shadow: var(--shadow-card);
-  animation: slideDown 0.45s ease;
-}
-
-.navigation ul {
-  display: flex;
-  list-style: none;
-  gap: 4px;
-}
-
-.navigation ul li { flex: 1; }
-
-.navigation a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 16px;
-  text-align: center;
-  color: var(--text);
-  text-decoration: none;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: all 0.18s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-icon {
-  font-size: 16px;
-  opacity: 0.7;
-}
-
-.navigation a:hover {
-  background: var(--bg-3);
-  color: var(--text-h);
-}
-
-.navigation a.active {
-  background: var(--accent-dim);
-  color: var(--accent);
-  border: 1px solid rgba(47,125,255,0.2);
-  box-shadow: 0 0 12px var(--accent-glow);
-}
-
-.navigation a.active .nav-icon { opacity: 1; }
 
 /* — PAGE LAYOUTS — */
 .page {
@@ -516,6 +466,11 @@ body::before {
 .refresh-btn:hover {
   border-color: var(--cyan);
   color: var(--cyan);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* — SIMULATION BUTTONS — */
@@ -824,6 +779,21 @@ body::before {
   gap: 6px;
 }
 
+.inline-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.inline-feedback {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--success);
+  letter-spacing: 0.04em;
+}
+
 .device-item {
   display: grid;
   grid-template-columns: 1fr auto auto;
@@ -904,6 +874,22 @@ body::before {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   transition: all 0.15s ease;
+}
+
+.service-icon {
+  color: var(--text-dim);
+}
+
+.service-item.online .service-icon { color: var(--success); }
+.service-item.offline .service-icon { color: var(--danger); }
+.service-item.checking .service-icon {
+  color: var(--warning);
+  animation: spin 1.1s linear infinite;
+}
+
+.service-open-btn {
+  padding: 4px 8px;
+  font-size: 10px;
 }
 
 .service-dot {
@@ -989,6 +975,25 @@ body::before {
 }
 
 .ota-stat-value.ok { color: var(--success); }
+
+.ota-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ota-log-line {
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-2);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
 /* — MISC — */
 .empty {
@@ -1491,7 +1496,6 @@ body::before {
   color: var(--text-dim);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 18px;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
@@ -1539,8 +1543,6 @@ body::before {
   .sim-button-group { grid-template-columns: 1fr 1fr; }
   .header-meta { display: none; }
   .app-header h1 { font-size: 18px; }
-  .navigation a { font-size: 12px; padding: 10px 8px; }
-  .nav-icon { display: none; }
   .service-item { grid-template-columns: auto 1fr auto; }
   .service-latency { display: none; }
   
@@ -1555,13 +1557,19 @@ body::before {
   .sim-button-group { grid-template-columns: 1fr 1fr; }
   .header-meta { display: none; }
   .app-header h1 { font-size: 18px; }
-  .navigation a { font-size: 12px; padding: 10px 8px; }
-  .nav-icon { display: none; }
   .service-item { grid-template-columns: auto 1fr auto; }
   .service-latency { display: none; }
   .server-control-panel,
   .simulation-readout {
     grid-template-columns: 1fr;
+  }
+
+  .inline-actions {
+    gap: 6px;
+  }
+
+  .service-open-btn {
+    justify-self: end;
   }
 }
 

@@ -80,7 +80,10 @@ export function OTAControl({ isMinimized = false }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [version, setVersion] = useState('');
+  const [otaStatus, setOtaStatus] = useState(null);
+  const [recentLogs, setRecentLogs] = useState([]);
   const [serverOk, setServerOk] = useState(true);
+  const [copyFeedback, setCopyFeedback] = useState('');
 
   const fetchData = useCallback(async () => {
     try {
@@ -89,8 +92,19 @@ export function OTAControl({ isMinimized = false }) {
         api.network.getDevices(),
         api.ota.getVersion(),
       ]);
+      const logsText = await api.ota.getLogs(20).catch(() => '');
+
       setDevices(networkData.devices || []);
       setVersion(versionData.version || 'N/A');
+      setOtaStatus(statusData || null);
+      setRecentLogs(
+        logsText
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .slice(-4)
+          .reverse()
+      );
       setServerOk(true);
       setError(null);
     } catch {
@@ -108,6 +122,22 @@ export function OTAControl({ isMinimized = false }) {
   }, [fetchData]);
 
   if (loading && isMinimized) return <div className="card widget-card loading">Cargando...</div>;
+
+  const pendingJobs = Number(otaStatus?.pending ?? otaStatus?.queue ?? 0);
+  const healthyState = String(otaStatus?.status || otaStatus?.state || '').toLowerCase();
+  const stateLabel = healthyState || (serverOk ? 'active' : 'offline');
+
+  const handleCopyVersion = async () => {
+    if (!version || version === 'N/A') return;
+    try {
+      await navigator.clipboard.writeText(version);
+      setCopyFeedback('Versión copiada');
+    } catch {
+      setCopyFeedback('No se pudo copiar');
+    } finally {
+      window.setTimeout(() => setCopyFeedback(''), 1200);
+    }
+  };
 
   if (isMinimized) {
     const gaugeVal = serverOk ? Math.max(1, devices.length) : 0;
@@ -135,12 +165,12 @@ export function OTAControl({ isMinimized = false }) {
             <div className="widget-stat">
               <span className="stat-label">Estado</span>
               <span className={`stat-value ${serverOk ? 'status-ok' : ''}`}>
-                {serverOk ? 'Activo' : 'Offline'}
+                {serverOk ? stateLabel : 'Offline'}
               </span>
             </div>
             <div className="widget-stat">
-              <span className="stat-label">Dispositivos</span>
-              <span className="stat-value">{devices.length}</span>
+              <span className="stat-label">Pendientes</span>
+              <span className="stat-value">{pendingJobs}</span>
             </div>
           </div>
         </div>
@@ -170,8 +200,19 @@ export function OTAControl({ isMinimized = false }) {
         </div>
         <div className="ota-item">
           <span className="label">Estado</span>
-          <span className="value status-ok">Activo</span>
+          <span className={`value ${serverOk ? 'status-ok' : ''}`}>{serverOk ? stateLabel : 'Offline'}</span>
         </div>
+        <div className="ota-item">
+          <span className="label">Pendientes</span>
+          <span className="value">{pendingJobs}</span>
+        </div>
+      </div>
+
+      <div className="inline-actions">
+        <button type="button" className="refresh-btn" onClick={handleCopyVersion}>
+          <AppIcon name="copy" className="btn-icon" size={13} /> Copiar versión
+        </button>
+        {copyFeedback && <span className="inline-feedback">{copyFeedback}</span>}
       </div>
 
       <div className="section">
@@ -196,10 +237,23 @@ export function OTAControl({ isMinimized = false }) {
       </div>
 
       <div className="section">
+        <h3><AppIcon name="logs" className="widget-title-icon" /> Logs recientes</h3>
+        {recentLogs.length === 0 ? (
+          <p className="empty">No hay logs recientes</p>
+        ) : (
+          <div className="ota-log-list">
+            {recentLogs.map((line, i) => (
+              <p key={`${line}-${i}`} className="ota-log-line">{line}</p>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="section">
         <h3>Actualizar Firmware</h3>
         <p className="info-text">Para actualizar el firmware, sube el archivo .bin desde el dashboard del servidor OTA.</p>
         <a href={OTA_SERVER} target="_blank" rel="noopener noreferrer" className="btn">
-          Abrir Dashboard OTA
+          <AppIcon name="external" className="btn-icon" size={14} /> Abrir Dashboard OTA
         </a>
       </div>
     </div>

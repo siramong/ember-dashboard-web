@@ -10,14 +10,23 @@ const SERVICES = [
 ];
 
 const MAX_BAR_MS = 400; // reference for 100% bar width
+const REQUEST_TIMEOUT_MS = 5000;
 
 async function checkService(service) {
-  const start = Date.now();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const start = performance.now();
   try {
-    await fetch(service.checkUrl, { mode: service.mode, cache: 'no-store' });
-    return { status: 'online', latency: Date.now() - start };
+    await fetch(service.checkUrl, {
+      mode: service.mode,
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+    return { status: 'online', latency: Math.round(performance.now() - start) };
   } catch {
     return { status: 'offline', latency: 0 };
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -79,6 +88,9 @@ export function ServiceChecker({ isMinimized = false }) {
   };
 
   const onlineCount = services.filter(s => s.status === 'online').length;
+  const handleOpenService = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   if (isMinimized) {
     return (
@@ -111,6 +123,11 @@ export function ServiceChecker({ isMinimized = false }) {
       <div className="service-list">
         {services.map(service => (
           <div key={service.name} className={`service-item ${service.status}`}>
+            <AppIcon
+              name={service.status === 'online' ? 'check' : service.status === 'offline' ? 'x' : 'refresh'}
+              className="service-icon"
+              size={14}
+            />
             <span className="service-name">{service.name}</span>
             <span className="service-status">
               {service.status === 'checking'
@@ -119,6 +136,9 @@ export function ServiceChecker({ isMinimized = false }) {
                   ? `✓ ${service.latency}ms`
                   : '✗ Offline'}
             </span>
+            <button type="button" className="refresh-btn service-open-btn" onClick={() => handleOpenService(service.url)}>
+              <AppIcon name="external" className="btn-icon" size={12} /> Abrir
+            </button>
           </div>
         ))}
       </div>
