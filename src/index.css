@@ -1564,3 +1564,250 @@ body::before {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ═══════════════════════════════════════
+   VISUAL ENHANCEMENTS — EMBER v2
+   Server lights, sparklines, EKG, gauges
+═══════════════════════════════════════ */
+
+/* — SERVER LIGHTS RACK — */
+.server-lights {
+  display: grid;
+  gap: 3px;
+  padding: 7px 9px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.server-led {
+  aspect-ratio: 1.35 / 1;
+  border-radius: 2px;
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+
+.server-led.led-off {
+  background: #06101a;
+  border: 1px solid #0c1a28;
+}
+
+.server-led.led-on.led-accent {
+  background: var(--accent);
+  box-shadow: 0 0 5px var(--accent-glow), 0 0 2px var(--accent);
+}
+
+.server-led.led-on.led-cyan {
+  background: var(--cyan);
+  box-shadow: 0 0 5px var(--cyan-glow), 0 0 2px var(--cyan);
+}
+
+.server-led.led-on.led-success {
+  background: #4f9fff;
+  box-shadow: 0 0 5px rgba(79,159,255,0.55), 0 0 2px #4f9fff;
+}
+
+.server-led.led-on.led-warning {
+  background: #5ea4ff;
+  box-shadow: 0 0 5px rgba(94,164,255,0.45);
+}
+
+/* — BIG NETWORK CLOCK — */
+.net-clock-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  padding: 2px 0 4px;
+}
+
+.clock-seg {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  font-feature-settings: "tnum";
+  text-shadow: 0 0 18px var(--accent-glow), 0 0 40px var(--accent-dim);
+  min-width: 2ch;
+  text-align: center;
+}
+
+.clock-sec {
+  font-size: 18px;
+  opacity: 0.65;
+  color: var(--accent-2);
+}
+
+.clock-colon {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--accent);
+  opacity: 0.5;
+  animation: blink 1s steps(1) infinite;
+  margin: 0 1px;
+}
+
+/* — SPARKLINE — */
+.sparkline-wrapper {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+}
+
+.sparkline-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* — EKG MONITOR — */
+.ekg-monitor {
+  position: relative;
+  height: 38px;
+  overflow: hidden;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.ekg-label {
+  position: absolute;
+  top: 4px;
+  right: 7px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ekg-live {
+  color: var(--success);
+  animation: blink 1.8s ease-in-out infinite;
+}
+
+.ekg-offline {
+  color: var(--danger);
+  opacity: 0.45;
+}
+
+/* — LATENCY BARS — */
+.lat-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lat-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  width: 64px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lat-track {
+  flex: 1;
+  height: 5px;
+  background: var(--bg-3);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.lat-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.55s ease;
+}
+
+.lat-fill-online {
+  background: linear-gradient(90deg, var(--success) 0%, var(--cyan) 100%);
+  box-shadow: 0 0 4px rgba(79,159,255,0.4);
+}
+
+.lat-fill-offline {
+  background: var(--danger);
+  width: 8px !important;
+  opacity: 0.35;
+}
+
+.lat-fill-checking {
+  background: var(--warning);
+  width: 45% !important;
+  animation: blink 0.9s steps(1) infinite;
+}
+
+.lat-ms {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.lat-ms-online  { color: var(--success); }
+.lat-ms-offline { color: var(--danger);  opacity: 0.6; }
+
+/* — ARC GAUGE (OTA) — */
+.ota-gauge-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ota-gauge-stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* — ACTUATOR RING GLOW — */
+.actuator-mini {
+  position: relative;
+  overflow: visible;
+}
+
+.actuator-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 4px;
+  border: 1px solid var(--success);
+  animation: actRing 2s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes actRing {
+  0%   { opacity: 0.7; transform: scale(1);    }
+  100% { opacity: 0;   transform: scale(1.25); }
+}
+
+.actuator-mini.active {
+  border-color: rgba(79,159,255,0.45);
+  background: linear-gradient(
+    135deg,
+    rgba(79,159,255,0.12) 0%,
+    rgba(79,159,255,0.06) 100%
+  );
+}
+
+.act-icon-on  { color: var(--success); }
+.act-icon-off { color: var(--text-dim); }
+
+.stat-dim { color: var(--text-dim); }

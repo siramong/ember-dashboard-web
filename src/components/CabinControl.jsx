@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { api, EMBER_SERVER_REST } from '../services/api';
 import { AppIcon } from './UiIcons';
 
@@ -9,8 +9,89 @@ const SIMULATIONS = [
   { mode: 'ExplorationSimulation', label: 'Exploración', icon: 'led' },
 ];
 
+// One EKG cycle — normalized y values (0=top, 1=bottom in screen coords)
+const EKG_CYCLE = [
+  0.5,0.5,0.5,0.5,0.5,
+  0.45,0.42,0.45,0.5,0.5,   // P wave
+  0.52,0.58,0.64,            // Q descent
+  0.05,                       // R peak spike UP
+  0.82,0.72,0.6,0.53,0.5,   // S + recovery
+  0.5,0.5,0.5,               // ST segment
+  0.43,0.38,0.36,0.38,0.44,0.5, // T wave
+  0.5,0.5,0.5,0.5,0.5,
+];
+
+function EKGMonitor({ active }) {
+  const POINTS = 55;
+  const idxRef = useRef(0);
+  const [pts, setPts] = useState(() => Array(POINTS).fill(0.5));
+
+  useEffect(() => {
+    if (!active) {
+      idxRef.current = 0;
+      setPts(Array(POINTS).fill(0.5));
+      return;
+    }
+    const id = setInterval(() => {
+      setPts(prev => {
+        const next = [...prev.slice(1), EKG_CYCLE[idxRef.current % EKG_CYCLE.length]];
+        idxRef.current++;
+        return next;
+      });
+    }, 38);
+    return () => clearInterval(id);
+  }, [active]);
+
+  const W = 120, H = 32;
+  const svgPts = pts
+    .map((v, i) => {
+      const x = ((i / (pts.length - 1)) * W).toFixed(1);
+      const y = (2 + v * (H - 4)).toFixed(1);
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  const strokeColor = active ? 'var(--success)' : 'var(--danger)';
+
+  return (
+    <div className="ekg-monitor" aria-hidden="true">
+      <span className={`ekg-label ${active ? 'ekg-live' : 'ekg-offline'}`}>
+        {active ? '● LIVE' : '○ OFFLINE'}
+      </span>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="none"
+        style={{ width: '100%', height: '100%' }}
+      >
+        {/* Glow trace */}
+        {active && (
+          <polyline
+            points={svgPts}
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.1"
+          />
+        )}
+        <polyline
+          points={svgPts}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
+}
+
 export function CabinControl({ isMinimized = false }) {
-  const [state, setState] = useState({ simulation: 'idle', difficulty: null, movement: 'idle', event: null, actuators: {} });
+  const [state, setState] = useState({
+    simulation: 'idle', difficulty: null, movement: 'idle', event: null, actuators: {},
+  });
   const [health, setHealth] = useState({ cabina: false });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,7 +139,6 @@ export function CabinControl({ isMinimized = false }) {
 
   if (loading && isMinimized) return <div className="card widget-card loading">Cargando...</div>;
 
-  // Modo minimizado
   if (isMinimized) {
     return (
       <div className="card widget-card">
@@ -68,10 +148,16 @@ export function CabinControl({ isMinimized = false }) {
             {cabinaConnected ? 'Cabina conectada' : 'Cabina offline'}
           </span>
         </div>
+
+        {/* EKG heartbeat monitor */}
+        <EKGMonitor active={cabinaConnected} />
+
         <div className="widget-body">
           <div className="widget-stat">
             <span className="stat-label">Simulación</span>
-            <span className="stat-value">{currentSimulation?.label || 'IDLE'}</span>
+            <span className={`stat-value ${simulationActive ? '' : 'stat-dim'}`}>
+              {currentSimulation?.label || 'IDLE'}
+            </span>
           </div>
           <div className="widget-stat">
             <span className="stat-label">Movimiento</span>
@@ -82,7 +168,6 @@ export function CabinControl({ isMinimized = false }) {
     );
   }
 
-  // Modo detalle
   if (loading) return <div className="loading">Cargando...</div>;
 
   return (
@@ -92,7 +177,7 @@ export function CabinControl({ isMinimized = false }) {
         <span>{cabinaConnected ? 'Cabina ESP32 conectada' : 'Cabina ESP32 desconectada'}</span>
       </div>
       {error && <p className="error-text">{error}</p>}
-      
+
       <div className="section">
         <h3>Estado de simulación</h3>
         <div className="simulation-readout">
@@ -142,7 +227,7 @@ export function CabinControl({ isMinimized = false }) {
         <p className="status-text">
           {serverControl.response
             ? `Respuesta servidor: ${serverControl.response.message || serverControl.response.status || 'stop recibido'}`
-            : 'El dashboard web solo puede detener por emergencia. El inicio de simulaciones vive fuera de este panel.'}
+            : 'El dashboard web solo puede detener por emergencia.'}
         </p>
       </div>
     </div>

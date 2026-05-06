@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 import { AppIcon } from './UiIcons';
+import { Sparkline } from './Sparkline';
 
 export function DeviceList({ isMinimized = false }) {
   const [devices, setDevices] = useState([]);
   const [scanInfo, setScanInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [lastCheck, setLastCheck] = useState(null);
 
   const fetchDevices = useCallback(async (force = false) => {
     try {
@@ -15,7 +15,6 @@ export function DeviceList({ isMinimized = false }) {
       setDevices(data.devices || []);
       setScanInfo(data);
       setError(null);
-      setLastCheck(data.scannedAt || Date.now());
     } catch {
       setError('No se pudo escanear la red');
     } finally {
@@ -36,18 +35,25 @@ export function DeviceList({ isMinimized = false }) {
   };
 
   const onlineCount = devices.filter(d => getStatusColor(d) === 'online').length;
-  const seenCount = devices.length;
   const formatDeviceName = (device) => device.hostname || device.ip || 'Dispositivo';
   const formatDeviceMeta = (device) => device.mac || device.source || 'sin MAC';
 
-  // Modo minimizado (para dashboard principal)
   if (isMinimized) {
     return (
       <div className="card widget-card">
         <div className="widget-header">
           <h3><AppIcon name="device" className="widget-title-icon" /> Dispositivos</h3>
-          <span className="badge">{onlineCount}/{seenCount} en línea</span>
+          <span className="badge">{onlineCount}/{devices.length} en línea</span>
         </div>
+
+        {/* Network activity sparkline */}
+        <Sparkline
+          color="var(--cyan)"
+          height={42}
+          pointCount={28}
+          updateInterval={1100}
+        />
+
         <div className="widget-body">
           {error ? (
             <p className="error-text">{error}</p>
@@ -59,13 +65,20 @@ export function DeviceList({ isMinimized = false }) {
                 <div key={device.ip || i} className={`preview-item ${getStatusColor(device)}`}>
                   <span className="device-id">{formatDeviceName(device)}</span>
                   <span className="device-status">
-                    {getStatusColor(device) === 'online' ? '● En línea' :
-                     getStatusColor(device) === 'warning' ? '● Visto' : '○ Offline'}
+                    {getStatusColor(device) === 'online'
+                      ? '● En línea'
+                      : getStatusColor(device) === 'warning'
+                        ? '● Visto'
+                        : '○ Offline'}
                   </span>
                 </div>
               ))}
-              {devices.length > 3 && <p className="more-text">+{devices.length - 3} más</p>}
-              {scanInfo?.interface && <p className="more-text">{scanInfo.interface.address}</p>}
+              {devices.length > 3 && (
+                <p className="more-text">+{devices.length - 3} más</p>
+              )}
+              {scanInfo?.interface && (
+                <p className="more-text">{scanInfo.interface.address}</p>
+              )}
             </div>
           )}
         </div>
@@ -73,13 +86,14 @@ export function DeviceList({ isMinimized = false }) {
     );
   }
 
-  // Modo detalle (modal)
   if (loading) return <div className="loading">Cargando dispositivos...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div>
-      <button onClick={() => fetchDevices(true)} className="refresh-btn"><AppIcon name="refresh" className="btn-icon" size={14} /> Escanear ahora</button>
+      <button onClick={() => fetchDevices(true)} className="refresh-btn">
+        <AppIcon name="refresh" className="btn-icon" size={14} /> Escanear ahora
+      </button>
       {scanInfo?.interface && (
         <p className="last-check">
           Red escaneada desde {scanInfo.interface.name} · {scanInfo.interface.address}

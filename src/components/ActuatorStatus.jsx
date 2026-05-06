@@ -14,6 +14,14 @@ const DEFAULT_STATE = {
   },
 };
 
+const ACTUATOR_DEFS = [
+  { key: 'motor',     label: 'Motor',     icon: 'actuator' },
+  { key: 'heater',    label: 'Calefactor', icon: 'fire'     },
+  { key: 'ledTower',  label: 'Torre LED',  icon: 'led'      },
+  { key: 'buzzer',    label: 'Buzzer',     icon: 'service'  },
+  { key: 'ledStrips', label: 'Tira LED',   icon: 'led'      },
+];
+
 export function ActuatorStatus({ isMinimized = false }) {
   const [state, setState] = useState(DEFAULT_STATE);
   const [loading, setLoading] = useState(true);
@@ -49,17 +57,9 @@ export function ActuatorStatus({ isMinimized = false }) {
   if (loading && isMinimized) return <div className="card widget-card loading">Cargando...</div>;
 
   const values = state.actuators || DEFAULT_STATE.actuators;
-  const actuators = [
-    { key: 'motor', label: 'Motor', active: values.motor, icon: 'actuator' },
-    { key: 'heater', label: 'Calefactor', active: values.heater, icon: 'fire' },
-    { key: 'ledTower', label: 'Torre LED', active: values.ledTower, icon: 'led' },
-    { key: 'buzzer', label: 'Buzzer', active: values.buzzer, icon: 'service' },
-    { key: 'ledStrips', label: 'Tira LED', active: values.ledStrips, icon: 'led' },
-  ];
-
+  const actuators = ACTUATOR_DEFS.map(a => ({ ...a, active: Boolean(values[a.key]) }));
   const activeCount = actuators.filter(a => a.active).length;
 
-  // Modo minimizado
   if (isMinimized) {
     return (
       <div className="card widget-card">
@@ -71,7 +71,9 @@ export function ActuatorStatus({ isMinimized = false }) {
           <div className="actuator-grid-mini">
             {actuators.map(act => (
               <div key={act.key} className={`actuator-mini ${act.active ? 'active' : 'inactive'}`}>
-                <span className="actuator-dot"></span>
+                {/* Outer ring glow for active */}
+                {act.active && <span className="actuator-ring" aria-hidden="true" />}
+                <AppIcon name={act.icon} size={14} className={act.active ? 'act-icon-on' : 'act-icon-off'} />
                 <span>{act.label}</span>
               </div>
             ))}
@@ -82,7 +84,6 @@ export function ActuatorStatus({ isMinimized = false }) {
     );
   }
 
-  // Modo detalle
   if (loading) return <div className="loading">Cargando estado...</div>;
 
   return (
